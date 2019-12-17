@@ -20,8 +20,11 @@ import javax.ws.rs.core.Response;
 import model.Account;
 import model.Customer;
 import dao.BankServiceDAO;
+import java.util.ArrayList;
 import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.PUT;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import model.BalanceRequest;
 import model.CreateAccountRequest;
 import model.TransferRequest;
@@ -38,33 +41,41 @@ public class BankController {
 
     private static Map<String, Customer> bankAccounts = BankServiceDAO.getBankAccounts();
 
-    @POST
+    @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/withdraw")
     public Response withdraw(WithdrawRequest request) {
 
         Customer currentCustomer = bankAccounts.get(request.getEmail());
+        
+        if(currentCustomer==null){
+            return Response.status(404).entity("customer not found").build();
+        }
+        
         List<Account> currentCustomerAccounts = currentCustomer.getAccountsList();
-
         for (int i = 0; i < currentCustomerAccounts.size(); i++) {
 
             if (UUID.fromString(request.getAccountNumber()).equals(currentCustomerAccounts.get(i).getAccountNumber())) {
 
                 double balance = currentCustomerAccounts.get(i).getBalance();
                 currentCustomerAccounts.get(i).setBalance(balance - request.getAmount());
-            }
-
+                }
         }
         return Response.status(200).entity(currentCustomer).build();
 
     }
 
-    @POST
+    @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/lodgement")
     public Response lodgment(WithdrawRequest request) {
 
         Customer currentCustomer = bankAccounts.get(request.getEmail());
+        
+        if(currentCustomer==null){
+            return Response.status(404).entity("customer not found").build();
+        }
+        
         List<Account> currentCustomerAccounts = currentCustomer.getAccountsList();
 
         for (int i = 0; i < currentCustomerAccounts.size(); i++) {
@@ -80,11 +91,16 @@ public class BankController {
 
     }
 
-    @POST
+    @PUT
     @Path("/transfer")
     public Response transfer(TransferRequest request) {
         Customer currentCustomer = bankAccounts.get(request.getEmailOrigin());
         Customer receivingCustomer = bankAccounts.get(request.getEmailDestination());
+        
+        if(currentCustomer==null || receivingCustomer==null){
+            return Response.status(404).entity("customer not found").build();
+        }
+        
         List<Account> currentCustomerAccounts = currentCustomer.getAccountsList();
         List<Account> receivingCustomerAccounts = receivingCustomer.getAccountsList();
 
@@ -115,8 +131,11 @@ public class BankController {
     @POST
     @Path("/create")
     public Response createUserAccount(CreateAccountRequest request) {
-
+        
         Customer customer = new Customer();
+        if(bankAccounts.containsKey(request.getEmail())){
+            return Response.status(409).entity("This email is already in use").build();
+        }
         customer.setName(request.getName());
         customer.setEmail(request.getEmail());
         customer.setPassword(request.getPassword());
@@ -124,17 +143,40 @@ public class BankController {
 
         Account account = new Account();
         account.setAccountName(request.getAccountName());
-        customer.setAccountsList(Arrays.asList(account));
+        customer.setAccountsList(new ArrayList<Account>(Arrays.asList(account)));
         bankAccounts.put(request.getEmail(), customer);
-        System.out.println(bankAccounts.size());
 
         return Response.status(200).entity(customer).build();
     }
-
+    
     @POST
+    @Path("/addAccount")
+    public Response addUserAccount(CreateAccountRequest request) {
+
+        Customer customer = bankAccounts.get(request.getEmail());
+        
+        if(customer==null){
+            return Response.status(404).entity("account not found").build();
+        }
+        Account account = new Account();
+        account.setAccountName(request.getAccountName());
+        List<Account> accounts = customer.getAccountsList();
+        accounts.add(account);
+        customer.setAccountsList(accounts);
+        bankAccounts.put(request.getEmail(), customer);
+
+        return Response.status(200).entity(customer).build();
+    }
+    
+    
+
+    @GET
     @Path("/balance")
     public Response balance(BalanceRequest request) {
         Customer currentCustomer = bankAccounts.get(request.getEmail());
+        if(currentCustomer==null){
+            return Response.status(404).entity("account not found").build();
+        }
 
         for (int i = 0; i < currentCustomer.getAccountsList().size(); i++) {
             if (UUID.fromString(request.getAccountNumber()).equals(currentCustomer.getAccountsList().get(i).getAccountNumber())) {
