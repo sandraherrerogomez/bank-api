@@ -53,10 +53,19 @@ public class TransferRequest {
     public void setAmount(double amount) {
         this.amount = amount;
     }
-    String emailOrigin;
-    String emailDestination;
-    String accountOrigin;
-    String accountDestination;
-    double amount;
+    private String emailOrigin;
+    private String emailDestination;
+    private String accountOrigin;
+    private String accountDestination;
+    private double amount;
+    private String password;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
     
 }

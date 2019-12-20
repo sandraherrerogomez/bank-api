@@ -53,6 +53,11 @@ public class BankController {
             return Response.status(404).entity("customer not found").build();
         }
         
+        if(false == request.getPassword().equals(currentCustomer.getPassword())){
+
+        return Response.status(404).entity("Incorrect password entered").build();
+        }
+        
         List<Account> currentCustomerAccounts = currentCustomer.getAccountsList();
         for (int i = 0; i < currentCustomerAccounts.size(); i++) {
 
@@ -75,6 +80,11 @@ public class BankController {
         
         if(currentCustomer==null){
             return Response.status(404).entity("customer not found").build();
+        }
+        
+        if(false == request.getPassword().equals(currentCustomer.getPassword())){
+
+        return Response.status(404).entity("Incorrect password entered").build();
         }
         
         List<Account> currentCustomerAccounts = currentCustomer.getAccountsList();
@@ -100,6 +110,11 @@ public class BankController {
         
         if(currentCustomer==null || receivingCustomer==null){
             return Response.status(404).entity("customer not found").build();
+        }
+        
+        if(false == request.getPassword().equals(currentCustomer.getPassword())){
+
+        return Response.status(404).entity("Incorrect password entered").build();
         }
         
         List<Account> currentCustomerAccounts = currentCustomer.getAccountsList();
@@ -137,6 +152,7 @@ public class BankController {
         if(bankAccounts.containsKey(request.getEmail())){
             return Response.status(409).entity("This email is already in use").build();
         }
+        
         customer.setName(request.getName());
         customer.setEmail(request.getEmail());
         customer.setPassword(request.getPassword());
@@ -159,6 +175,11 @@ public class BankController {
         if(customer==null){
             return Response.status(404).entity("account not found").build();
         }
+        
+        if(false == request.getPassword().equals(customer.getPassword())){
+
+        return Response.status(404).entity("Incorrect password entered").build();
+        }
         Account account = new Account();
         account.setAccountName(request.getAccountName());
         List<Account> accounts = customer.getAccountsList();
@@ -175,8 +196,14 @@ public class BankController {
     @Path("/balance")
     public Response balance(BalanceRequest request) {
         Customer currentCustomer = bankAccounts.get(request.getEmail());
+        
         if(currentCustomer==null){
             return Response.status(404).entity("account not found").build();
+        }
+        
+        if(false == request.getPassword().equals(currentCustomer.getPassword())){
+
+        return Response.status(404).entity("Incorrect password entered").build();
         }
 
         for (int i = 0; i < currentCustomer.getAccountsList().size(); i++) {
@@ -202,7 +229,7 @@ public class BankController {
         }
         
         else{
-            return Response.status(404).entity("account not found").build();
+            return Response.status(404).entity("Incorrect password entered").build();
         
         }
         

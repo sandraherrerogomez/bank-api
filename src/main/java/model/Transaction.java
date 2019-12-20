@@ -17,10 +17,12 @@ import java.util.Date;
  */
 public class Transaction {
     private double balance;
-    String transactionType;
-    Date date;
-    String description;
-    double postBalance;
+    private String transactionType;
+    private Date date;
+    private String description;
+    private double postBalance;
+    
+    
     
     public void deposit(double amount){
         balance=balance+amount;

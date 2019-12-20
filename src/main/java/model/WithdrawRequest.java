@@ -16,6 +16,15 @@ public class WithdrawRequest {
     private int amount;
     private String accountNumber;
     private String email;
+    private String password;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public int getAmount() {
         return amount;
