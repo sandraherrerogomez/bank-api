@@ -28,6 +28,7 @@ import javax.ws.rs.PUT;
 import model.BalanceRequest;
 import model.CreateAccountRequest;
 import model.TransferRequest;
+import model.UserRequest;
 import model.WithdrawRequest;
 
 /**
@@ -185,6 +186,27 @@ public class BankController {
         }
 
         return Response.status(404).entity("Account number " + request.getAccountNumber() + " not found").build();
+    }
+    
+    @GET
+    @Path("/customerInfo")
+    public Response customerInfo(UserRequest request) {
+        Customer currentCustomer = bankAccounts.get(request.getEmail());
+        if(currentCustomer==null){
+            return Response.status(404).entity("account not found").build();
+        }
+        
+        if(request.getPassword().equals(currentCustomer.getPassword())){
+
+        return Response.status(200).entity(currentCustomer).build();
+        }
+        
+        else{
+            return Response.status(404).entity("account not found").build();
+        
+        }
+        
+
     }
 
 }
