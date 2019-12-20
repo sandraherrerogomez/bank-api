@@ -53,15 +53,25 @@ public class BankController {
             return Response.status(404).entity("customer not found").build();
         }
         
-        if(false == request.getPassword().equals(currentCustomer.getPassword())){
+        if(request.getPassword() == null || false == request.getPassword().equals(currentCustomer.getPassword())){
 
-        return Response.status(404).entity("Incorrect password entered").build();
+        return Response.status(401).entity("Incorrect password entered").build();
         }
         
         List<Account> currentCustomerAccounts = currentCustomer.getAccountsList();
+        UUID id;
+        
+        try{
+            id= UUID.fromString(request.getAccountNumber());
+        }
+        
+        catch(IllegalArgumentException e){
+            return Response.status(403).entity("account not valid").build();
+        }
+        
         for (int i = 0; i < currentCustomerAccounts.size(); i++) {
 
-            if (UUID.fromString(request.getAccountNumber()).equals(currentCustomerAccounts.get(i).getAccountNumber())) {
+            if (id.equals(currentCustomerAccounts.get(i).getAccountNumber())) {
 
                 double balance = currentCustomerAccounts.get(i).getBalance();
                 currentCustomerAccounts.get(i).setBalance(balance - request.getAmount());
@@ -82,16 +92,24 @@ public class BankController {
             return Response.status(404).entity("customer not found").build();
         }
         
-        if(false == request.getPassword().equals(currentCustomer.getPassword())){
+        if(request.getPassword() == null || false == request.getPassword().equals(currentCustomer.getPassword())){
 
-        return Response.status(404).entity("Incorrect password entered").build();
+        return Response.status(401).entity("Incorrect password entered").build();
         }
         
         List<Account> currentCustomerAccounts = currentCustomer.getAccountsList();
+        UUID id;
+        try{
+            id= UUID.fromString(request.getAccountNumber());
+        }
+        
+        catch(IllegalArgumentException e){
+            return Response.status(403).entity("account not valid").build();
+        }
 
         for (int i = 0; i < currentCustomerAccounts.size(); i++) {
 
-            if (UUID.fromString(request.getAccountNumber()).equals(currentCustomerAccounts.get(i).getAccountNumber())) {
+            if (id.equals(currentCustomerAccounts.get(i).getAccountNumber())) {
 
                 double balance = currentCustomerAccounts.get(i).getBalance();
                 currentCustomerAccounts.get(i).setBalance(balance + request.getAmount());
@@ -112,9 +130,9 @@ public class BankController {
             return Response.status(404).entity("customer not found").build();
         }
         
-        if(false == request.getPassword().equals(currentCustomer.getPassword())){
-
-        return Response.status(404).entity("Incorrect password entered").build();
+        
+        if(request.getPassword() == null || false == request.getPassword().equals(currentCustomer.getPassword())){
+        return Response.status(401).entity("Incorrect password entered").build();
         }
         
         List<Account> currentCustomerAccounts = currentCustomer.getAccountsList();
@@ -125,16 +143,36 @@ public class BankController {
 
         //In this first for we dont extract the money yet, as this will be done after finding the destination account in the second loop, using 
         //the variable indexAccountOrigin
+        
+        UUID id1;
+        
+        try{
+            id1= UUID.fromString(request.getAccountDestination());
+        }
+        
+        catch(IllegalArgumentException e){
+            return Response.status(403).entity("account not valid").build();
+        }
         for (int i = 0; i < currentCustomerAccounts.size(); i++) {
-            if (UUID.fromString(request.getAccountOrigin()).equals(currentCustomerAccounts.get(i).getAccountNumber())) {
+            if (id1.equals(currentCustomerAccounts.get(i).getAccountNumber())) {
                 double balance = currentCustomerAccounts.get(i).getBalance();
                 indexAccountOrigin = i;
             }
 
         }
+        
+       UUID id2;
+        
+        try{
+            id2= UUID.fromString(request.getAccountDestination());
+        }
+        
+        catch(IllegalArgumentException e){
+            return Response.status(403).entity("account not valid").build();
+        }
 
         for (int i = 0; i < receivingCustomerAccounts.size(); i++) {
-            if (UUID.fromString(request.getAccountDestination()).equals(receivingCustomerAccounts.get(i).getAccountNumber())) {
+            if (id2.equals(receivingCustomerAccounts.get(i).getAccountNumber())) {
                 double balance = receivingCustomerAccounts.get(i).getBalance();
                 receivingCustomerAccounts.get(i).setBalance(balance + request.getAmount());
                 currentCustomerAccounts.get(indexAccountOrigin).setBalance(balance - request.getAmount());
@@ -149,6 +187,11 @@ public class BankController {
     public Response createUserAccount(CreateAccountRequest request) {
         
         Customer customer = new Customer();
+        
+        if(request.getEmail()==null){
+             return Response.status(403).entity("Email is mandatory").build();
+        }
+        
         if(bankAccounts.containsKey(request.getEmail())){
             return Response.status(409).entity("This email is already in use").build();
         }
@@ -176,9 +219,9 @@ public class BankController {
             return Response.status(404).entity("account not found").build();
         }
         
-        if(false == request.getPassword().equals(customer.getPassword())){
+        if(request.getPassword() == null || false == request.getPassword().equals(customer.getPassword())){
 
-        return Response.status(404).entity("Incorrect password entered").build();
+        return Response.status(401).entity("Incorrect password entered").build();
         }
         Account account = new Account();
         account.setAccountName(request.getAccountName());
@@ -201,9 +244,9 @@ public class BankController {
             return Response.status(404).entity("account not found").build();
         }
         
-        if(false == request.getPassword().equals(currentCustomer.getPassword())){
+        if(request.getPassword() == null || false == request.getPassword().equals(currentCustomer.getPassword())){
 
-        return Response.status(404).entity("Incorrect password entered").build();
+        return Response.status(401).entity("Incorrect password entered").build();
         }
 
         for (int i = 0; i < currentCustomer.getAccountsList().size(); i++) {
@@ -220,7 +263,7 @@ public class BankController {
     public Response customerInfo(UserRequest request) {
         Customer currentCustomer = bankAccounts.get(request.getEmail());
         if(currentCustomer==null){
-            return Response.status(404).entity("account not found").build();
+            return Response.status(401).entity("account not found").build();
         }
         
         if(request.getPassword().equals(currentCustomer.getPassword())){
@@ -229,7 +272,7 @@ public class BankController {
         }
         
         else{
-            return Response.status(404).entity("Incorrect password entered").build();
+            return Response.status(401).entity("Incorrect password entered").build();
         
         }
         
